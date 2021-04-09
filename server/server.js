@@ -96,6 +96,7 @@ server.get('/api/v1/users', async (req, res) => {
     return output
   })
   res.json(users)
+  return users
 })
 
 // post /api/v1/users - добавляет юзера в файл users.json, с id равным id последнего элемента + 1 и возвращает { status: 'success', id: id }
