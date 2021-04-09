@@ -117,7 +117,7 @@ server.get('/api/v1/users', async (req, res) => {
 
 // Pepe КОД (адовый, с кэтчем отсутствия файла)
 server.post('/api/v1/users', async (req, res) => {
-  const newUser = req.body
+  const newUser = { ...req.body }
 
   const result = await readFile(`${__dirname}/data/users.json`, { encoding: 'utf8'})
     .then((text) => {
@@ -139,6 +139,7 @@ server.post('/api/v1/users', async (req, res) => {
     return parsing
   })
   res.json(result)
+  return result
 })
 
 // patch /api/v1/users/:userId - получает новый объект, дополняет его полями юзера в users.json, с id равным userId, и возвращает { status: 'success', id: userId }
