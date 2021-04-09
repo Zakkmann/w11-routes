@@ -169,15 +169,14 @@ server.patch('/api/v1/users/:userId', async (req, res) => {
 })
 
 // delete /api/v1/users/:userId - удаляет юзера в users.json, с id равным userId, и возвращает { status: 'success', id: userId }
-// проще всего сделать .map, но я сделал reduce
+// можно редьюсом: users.reduce((acc, rec) => (rec.id !== +userId) ? [...acc, rec] : acc, [])
 
 server.delete('/api/v1/users/:userId', async (req, res) => {
   const { userId } = req.params
   await readFile(`${__dirname}/data/users.json`, { encoding: 'utf8'})
     .then((list) => {
       const users = JSON.parse(list)
-      const filteredUsers = users.reduce((acc, rec) => (rec.id !== +userId) ? [...acc, rec] : acc, [])
-      console.log(userId)
+      const filteredUsers = users.filter((user) => user.id !== +userId)
       writeFile(`${__dirname}/data/users.json`, JSON.stringify(filteredUsers), { encoding: 'utf8'})
     })
   .catch((err) => console.log(err))
