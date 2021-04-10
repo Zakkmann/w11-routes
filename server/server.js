@@ -6,6 +6,7 @@ import sockjs from 'sockjs'
 import { renderToStaticNodeStream } from 'react-dom/server'
 import React from 'react'
 import axios from 'axios'
+
 import cookieParser from 'cookie-parser'
 import config from './config'
 import Html from '../client/html'
@@ -28,7 +29,7 @@ const port = process.env.PORT || 8090
 const server = express()
 
 const setHeaders = (req, res, next) => {
-  res.set('x-skillcrucial-user', 'a523cc26-69aa-4ca0-ba95-7bb54a86f9b0')
+  res.set('x-skillcrucial-user', '385666b1-bff5-11e9-95ba-1bf845c18f8d')
   res.set('Access-Control-Expose-Headers', 'X-SKILLCRUCIAL-USER')
   next()
 }
@@ -44,8 +45,6 @@ const middleware = [
 
 middleware.forEach((it) => server.use(it))
 
-// подготовка
-
 server.get('/api/v1/ok', (req, res) => {
   res.json({ status: 'OK' })
 })
@@ -54,19 +53,12 @@ server.get('/api/v1/notok', (req, res) => {
   res.json({ status: 'Not Ok' })
 })
 
-server.get('/api/v1/test1', (req, res) => {
-   axios('https://jsonplaceholder.typicode.com/users').then((usrs) => res.json(usrs.data))
-})
-
-// любопытная деструктуризация (Пепе говорит, что это лучший варик):
-server.get('/api/v1/test2', async(req, res) => {
-  const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
-  res.json({ ...users })
-})
-
-// TASK 01:
-// get /api/v1/users - получает всех юзеров из файла users.json, если его нет - получает данные с сервиса
-// https://jsonplaceholder.typicode.com/users, заполняет файл users.json полученными данными и возвращает эти данные пользователю.
+/*
+Для дискорда
+```
+<Свой код>
+```
+*/
 
 function getUsers() {
   return readFile(`${__dirname}/data/users.json`, { encoding: 'utf8' })
@@ -102,8 +94,6 @@ server.get('/api/v1/users', async (req, res) => {
   res.json(users)
 })
 
-// post /api/v1/users - добавляет юзера в файл users.json, с id равным id последнего элемента + 1 и возвращает { status: 'success', id: id }
-
 server.post('/api/v1/users', async (req, res) => {
   const result = await readFile(`${__dirname}/data/users.json`, { encoding: 'utf8' })
     .then((text) => {
@@ -117,15 +107,24 @@ server.post('/api/v1/users', async (req, res) => {
   res.json(result)
 })
 
-// patch /api/v1/users/:userId - получает новый объект, дополняет его полями юзера в users.json, с id равным userId, и возвращает { status: 'success', id: userId }
-
-server.get('/api/v1/users/:id', (req, res) => {
-  const { id } = req.params
-  // const id = req.params.id - идентичная запись, но ESLint ругается и хочет деструктуризацию ;(
+server.get('/api/v1/users/:someParam', (req, res) => {
+  const { someParam } = req.params
   console.log(req.params)
-  res.json({ thisIs: id })
+  res.json({ param: someParam })
 })
 
+/*
+[{
+  id: 1,
+  name: 'Alec'
+},{
+  id: 2,
+  name: 'Max'
+},{
+  id: 3,
+  name: 'Pepe'
+}]
+*/
 
 server.patch('/api/v1/users/:userId', async (req, res) => {
   const newData = req.body
@@ -147,9 +146,6 @@ server.patch('/api/v1/users/:userId', async (req, res) => {
   res.json({ status: 'success', id: userId })
 })
 
-// delete /api/v1/users/:userId - удаляет юзера в users.json, с id равным userId, и возвращает { status: 'success', id: userId }
-// можно редьюсом: users.reduce((acc, rec) => (rec.id !== +userId) ? [...acc, rec] : acc, [])
-
 server.delete('/api/v1/users/:userId', async (req, res) => {
   const { userId } = req.params
   await readFile(`${__dirname}/data/users.json`, { encoding: 'utf8' })
@@ -164,14 +160,10 @@ server.delete('/api/v1/users/:userId', async (req, res) => {
   res.json({ status: 'success', id: userId })
 })
 
-// delete /api/v1/users - удаляет файл users.json
-
 server.delete('/api/v1/users', (req, res) => {
   unlink(`${__dirname}/data/users.json`)
   res.json({ status: 'success' })
 })
-
-// Done!
 
 server.use('/api/', (req, res) => {
   res.status(404)
